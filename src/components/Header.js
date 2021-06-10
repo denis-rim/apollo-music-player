@@ -1,5 +1,11 @@
 import React from "react";
-import { AppBar, makeStyles, Toolbar, Typography } from "@material-ui/core";
+import {
+  AppBar,
+  makeStyles,
+  Toolbar,
+  Typography,
+  useMediaQuery,
+} from "@material-ui/core";
 import { HeadsetTwoTone } from "@material-ui/icons";
 
 const useStyles = makeStyles((theme) => ({
