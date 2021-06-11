@@ -10,11 +10,13 @@ import {
   Typography,
 } from "@material-ui/core";
 import { PlayArrow, Save } from "@material-ui/icons";
-import { GET_SONGS } from "../graphql/queries";
-import { useQuery } from "react-apollo";
+import { GET_SONGS } from "../graphql/subscriptions";
+import { useSubscription, useQuery } from "react-apollo";
 
 const SongList = () => {
-  const { data, loading, error } = useQuery(GET_SONGS);
+  const { data, loading, error } = useSubscription(GET_SONGS);
+
+  console.log(error);
 
   // const song = {
   //   title: "LUNE",
