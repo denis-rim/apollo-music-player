@@ -10,16 +10,18 @@ import {
   Typography,
 } from "@material-ui/core";
 import { PlayArrow, Save } from "@material-ui/icons";
+import { GET_SONGS } from "../graphql/queries";
+import { useQuery } from "react-apollo";
 
 const SongList = () => {
-  let loading = false;
+  const { data, loading, error } = useQuery(GET_SONGS);
 
-  const song = {
-    title: "LUNE",
-    artist: "MÖÖN",
-    thumbnail:
-      "https://dokclub.ru/upload/wysiwyg/b335c6c154db28d84adf675ed09b8d96.png",
-  };
+  // const song = {
+  //   title: "LUNE",
+  //   artist: "MÖÖN",
+  //   thumbnail:
+  //     "https://dokclub.ru/upload/wysiwyg/b335c6c154db28d84adf675ed09b8d96.png",
+  // };
 
   if (loading) {
     return (
@@ -36,10 +38,12 @@ const SongList = () => {
     );
   }
 
+  if (error) return <div>Error...</div>;
+
   return (
     <div>
-      {Array.from({ length: 10 }, () => song).map((song, i) => (
-        <Song key={i} song={song} />
+      {data.songs.map((song) => (
+        <Song key={song.id} song={song} />
       ))}
     </div>
   );
@@ -66,7 +70,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Song = ({ song }) => {
-  const { title, artist, thumbnail } = song;
+  const { title, artist, thumbnail, duration, url } = song;
   const classes = useStyles();
 
   return (
