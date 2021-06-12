@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import QueuedSongList from "./QueuedSongList";
 import {
   Card,
@@ -9,7 +9,8 @@ import {
   Slider,
   Typography,
 } from "@material-ui/core";
-import { PlayArrow, SkipNext, SkipPrevious } from "@material-ui/icons";
+import { Pause, PlayArrow, SkipNext, SkipPrevious } from "@material-ui/icons";
+import { SongContext } from "../App";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -25,7 +26,7 @@ const useStyles = makeStyles((theme) => ({
     flex: "1 0 auto",
   },
   thumbnail: {
-    width: 150,
+    minWidth: 250,
   },
   controls: {
     display: "flex",
@@ -40,7 +41,12 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const SongPlayer = () => {
+  const { state, dispatch } = useContext(SongContext);
   const classes = useStyles();
+
+  const handleTogglePlay = () => {
+    dispatch(state.isPlaying ? { type: "PAUSE_SONG" } : { type: "PLAY_SONG" });
+  };
 
   return (
     <>
@@ -48,10 +54,10 @@ const SongPlayer = () => {
         <div className={classes.details}>
           <CardContent className={classes.content}>
             <Typography variant="h5" component="h3">
-              Title
+              {state.song.title}
             </Typography>
             <Typography variant="subtitle1" component="p" color="textSecondary">
-              Artist
+              {state.song.artist}
             </Typography>
           </CardContent>
           <div className={classes.controls}>
@@ -59,7 +65,17 @@ const SongPlayer = () => {
               <SkipPrevious />
             </IconButton>
             <IconButton>
-              <PlayArrow className={classes.playIcon} />
+              {state.isPlaying ? (
+                <Pause
+                  onClick={handleTogglePlay}
+                  className={classes.playIcon}
+                />
+              ) : (
+                <PlayArrow
+                  onClick={handleTogglePlay}
+                  className={classes.playIcon}
+                />
+              )}
             </IconButton>
             <IconButton>
               <SkipNext />
@@ -70,10 +86,7 @@ const SongPlayer = () => {
           </div>
           <Slider min={0} max={1} step={0.01} />
         </div>
-        <CardMedia
-          className={classes.thumbnail}
-          image="https://dokclub.ru/upload/wysiwyg/b335c6c154db28d84adf675ed09b8d96.png"
-        />
+        <CardMedia className={classes.thumbnail} image={state.song.thumbnail} />
       </Card>
       <QueuedSongList />
     </>

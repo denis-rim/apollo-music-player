@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Card,
   CardActions,
@@ -9,21 +9,13 @@ import {
   makeStyles,
   Typography,
 } from "@material-ui/core";
-import { PlayArrow, Save } from "@material-ui/icons";
+import { Pause, PlayArrow, Save } from "@material-ui/icons";
 import { GET_SONGS } from "../graphql/subscriptions";
 import { useSubscription, useQuery } from "react-apollo";
+import { SongContext } from "../App";
 
 const SongList = () => {
   const { data, loading, error } = useSubscription(GET_SONGS);
-
-  console.log(error);
-
-  // const song = {
-  //   title: "LUNE",
-  //   artist: "MÖÖN",
-  //   thumbnail:
-  //     "https://dokclub.ru/upload/wysiwyg/b335c6c154db28d84adf675ed09b8d96.png",
-  // };
 
   if (loading) {
     return (
@@ -72,8 +64,15 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Song = ({ song }) => {
-  const { title, artist, thumbnail, duration, url } = song;
+  const { title, artist, thumbnail, duration, url, id } = song;
+  const [currentSongPlaying, setCurrentSongPlaying] = useState(false);
+  const { state } = useContext(SongContext);
   const classes = useStyles();
+
+  useEffect(() => {
+    const isPlaying = state.isPlaying && id === state.song.id;
+    setCurrentSongPlaying(isPlaying);
+  }, [id, state.song.id, state.isPlaying]);
 
   return (
     <Card className={classes.container}>
@@ -90,7 +89,7 @@ const Song = ({ song }) => {
           </CardContent>
           <CardActions>
             <IconButton size="small" color="primary">
-              <PlayArrow />
+              {currentSongPlaying ? <Pause /> : <PlayArrow />}
             </IconButton>
             <IconButton size="small" color="secondary">
               <Save />

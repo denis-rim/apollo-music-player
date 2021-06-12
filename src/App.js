@@ -3,14 +3,30 @@ import AddSong from "./components/AddSong";
 import SongList from "./components/SongList";
 import SongPlayer from "./components/SongPlayer";
 import { Grid, Hidden, useMediaQuery } from "@material-ui/core";
+import { createContext, useContext, useReducer } from "react";
+import { songReducer } from "./reducer";
+
+export const SongContext = createContext({
+  song: {
+    id: "841db122-4c1b-4aef-b901-5e30364d5eb0",
+    title:
+      "Iron Maiden, ,Metallica, Helloween, BlackSabbath - Heavy Metal Hard Rock Music 2021",
+    artist: "Youtube",
+    thumbnail: "https://i.ytimg.com/vi/80lKLqLm16I/0.jpg",
+    url: "https://www.youtube.com/watch?v=80lKLqLm16I",
+    duration: 4430,
+  },
+  isPlaying: false,
+});
 
 function App() {
-  // const matches = useMediaQuery('(min-width: 600px)')
+  const initialSongState = useContext(SongContext);
+  const [state, dispatch] = useReducer(songReducer, initialSongState);
   const greaterThenSm = useMediaQuery((theme) => theme.breakpoints.up("sm"));
   const greaterThenMd = useMediaQuery((theme) => theme.breakpoints.up("md"));
 
   return (
-    <>
+    <SongContext.Provider value={{ state, dispatch }}>
       {/*{greaterThenSm && <Header />}*/}
       <Hidden only="xs">
         <Header />
@@ -43,7 +59,7 @@ function App() {
           <SongPlayer />
         </Grid>
       </Grid>
-    </>
+    </SongContext.Provider>
   );
 }
 
