@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React from "react";
 import {
   Card,
   CardActions,
@@ -11,8 +11,9 @@ import {
 } from "@material-ui/core";
 import { Pause, PlayArrow, Save } from "@material-ui/icons";
 import { GET_SONGS } from "../graphql/subscriptions";
-import { useSubscription, useQuery } from "react-apollo";
+import { useSubscription, useMutation } from "react-apollo";
 import { SongContext } from "../App";
+import { ADD_OR_REMOVE_FROM_QUEUE } from "../graphql/mutations";
 
 const SongList = () => {
   const { data, loading, error } = useSubscription(GET_SONGS);
@@ -64,15 +65,32 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Song = ({ song }) => {
-  const { title, artist, thumbnail, duration, url, id } = song;
-  const [currentSongPlaying, setCurrentSongPlaying] = useState(false);
-  const { state } = useContext(SongContext);
+  const { id } = song;
   const classes = useStyles();
+  const [addOrRemoveFromQueue] = useMutation(ADD_OR_REMOVE_FROM_QUEUE, {
+    onCompleted: (data) => {
+      localStorage.setItem("queue", JSON.stringify(data.addOrRemoveFromQueue));
+    },
+  });
+  const { state, dispatch } = React.useContext(SongContext);
+  const [currentSongPlaying, setCurrentSongPlaying] = React.useState(false);
+  const { title, artist, thumbnail } = song;
 
-  useEffect(() => {
-    const isPlaying = state.isPlaying && id === state.song.id;
-    setCurrentSongPlaying(isPlaying);
+  React.useEffect(() => {
+    const isSongPlaying = state.isPlaying && id === state.song.id;
+    setCurrentSongPlaying(isSongPlaying);
   }, [id, state.song.id, state.isPlaying]);
+
+  function handleTogglePlay() {
+    dispatch({ type: "SET_SONG", payload: { song } });
+    dispatch(state.isPlaying ? { type: "PAUSE_SONG" } : { type: "PLAY_SONG" });
+  }
+
+  function handleAddOrRemoveFromQueue() {
+    addOrRemoveFromQueue({
+      variables: { input: { ...song, __typename: "Song" } },
+    });
+  }
 
   return (
     <Card className={classes.container}>
@@ -88,10 +106,14 @@ const Song = ({ song }) => {
             </Typography>
           </CardContent>
           <CardActions>
-            <IconButton size="small" color="primary">
+            <IconButton onClick={handleTogglePlay} size="small" color="primary">
               {currentSongPlaying ? <Pause /> : <PlayArrow />}
             </IconButton>
-            <IconButton size="small" color="secondary">
+            <IconButton
+              onClick={handleAddOrRemoveFromQueue}
+              size="small"
+              color="secondary"
+            >
               <Save />
             </IconButton>
           </CardActions>
